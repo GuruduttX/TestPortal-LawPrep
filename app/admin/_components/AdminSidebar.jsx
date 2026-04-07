@@ -1,0 +1,112 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const navItems = [
+  {
+    name: 'Dashboard',
+    href: '/admin',
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Exam Management',
+    href: '/admin/exams',
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+  },
+  {
+    name: 'Results & Analysis',
+    href: '/admin/results',
+    icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    ),
+  },
+];
+
+export default function AdminSidebar() {
+  const pathname = usePathname();
+
+  return (
+    <aside
+      className="fixed inset-y-0 left-0 z-40 flex w-[240px] flex-col"
+      style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)' }}
+    >
+      {/* Brand */}
+      <div className="px-5 pt-6 pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="flex items-center gap-3">
+          <div
+            className="h-10 w-10 rounded-md flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #e94560 0%, #c0392b 100%)', boxShadow: '0 4px 12px rgba(233,69,96,0.35)' }}
+          >
+            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 14l9-5-9-5-9 5 9 5z" />
+              <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-extrabold text-white tracking-wide">EXAM SYSTEM</p>
+            <p className="text-[9px] font-bold tracking-widest uppercase" style={{ color: '#e94560' }}>Admin Control Panel</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto px-3 pt-4">
+        <p className="px-3 mb-3 text-[9px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>Main Menu</p>
+        <div className="space-y-1">
+          {navItems.map((item) => {
+            const isActive =
+              item.href === '/admin'
+                ? pathname === '/admin'
+                : pathname.startsWith(item.href);
+
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="flex items-center gap-3 px-4 py-3 text-[13px] font-semibold transition-all duration-150"
+                style={isActive ? {
+                  background: 'linear-gradient(90deg, rgba(233,69,96,0.15), rgba(233,69,96,0.05))',
+                  borderLeft: '3px solid #e94560',
+                  color: '#ffffff',
+                } : {
+                  borderLeft: '3px solid transparent',
+                  color: 'rgba(255,255,255,0.4)',
+                }}
+              >
+                <span style={{ color: isActive ? '#e94560' : 'rgba(255,255,255,0.3)' }}>
+                  {item.icon}
+                </span>
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Footer */}
+      <div className="px-5 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="flex items-center gap-2.5">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+          </span>
+          <div>
+            <span className="text-[11px] font-bold text-green-400">System Online</span>
+            <p className="text-[9px] font-medium" style={{ color: 'rgba(255,255,255,0.2)' }}>Exam Portal v2.0</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+}
