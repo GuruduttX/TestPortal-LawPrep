@@ -4,8 +4,25 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Scholarship Exam Platform",
-  description: "Multi-exam scholarship testing platform with admin dashboard",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+  title: {
+    default: 'Candidate Assessment Portal — LawPrep',
+    template: '%s | LawPrep Assessment',
+  },
+  description: 'Secure online examination platform for scholarship and law entrance assessments. Take tests, track progress, and view detailed results.',
+  keywords: ['law entrance exam', 'scholarship test', 'online assessment', 'CLAT preparation'],
+  robots: { index: false, follow: false }, // private exam portal — don't index
+  openGraph: {
+    type: 'website',
+    siteName: 'LawPrep Assessment Portal',
+    title: 'Candidate Assessment Portal — LawPrep',
+    description: 'Secure online examination platform for scholarship and law entrance assessments.',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Candidate Assessment Portal — LawPrep',
+    description: 'Secure online examination platform for scholarship and law entrance assessments.',
+  },
 };
 
 export default function RootLayout({ children }) {

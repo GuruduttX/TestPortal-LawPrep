@@ -3,6 +3,7 @@ import ResultClient from './ResultClient';
 import { isAdminAuthenticated } from '@/lib/admin-auth';
 import { getAttemptDetail } from '@/lib/dashboard-data';
 import { hasResultAccess } from '@/lib/security-tokens';
+import { computeMaxPossibleMarks } from '@/lib/exam-management';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,9 +88,11 @@ export default async function ResultPage({ params }) {
     );
   }
 
+  const maxPossibleMarks = computeMaxPossibleMarks(exam, questions.length);
+
   return (
     <main className="min-h-screen bg-gray-100 text-gray-900 font-sans pb-24 p-4 sm:p-8">
-      <ResultClient attempt={attempt} exam={exam} questions={questions} />
+      <ResultClient attempt={attempt} exam={exam} questions={questions} maxPossibleMarks={maxPossibleMarks} />
     </main>
   );
 }

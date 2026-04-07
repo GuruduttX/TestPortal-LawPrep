@@ -126,8 +126,8 @@ export default async function AdminOverviewPage() {
         ) : (
           <div>
             {exams.map((exam, idx) => {
-              const avg = exam.questionCount
-                ? Math.round((exam.averageScore / exam.questionCount) * 100) : 0;
+              const avg = exam.maxPossibleMarks > 0
+                ? Math.round((exam.averageScore / exam.maxPossibleMarks) * 100) : 0;
 
               return (
                 <div key={exam.id} className="px-5 py-3 transition-colors hover:bg-blue-50/40"

@@ -219,6 +219,14 @@ export async function POST(req) {
       path: '/',
       maxAge: securityConstants.RESULT_TOKEN_MAX_AGE_SEC,
     });
+    // Clear OTP verification cookie — exam is done, prevent reuse
+    response.cookies.set('otp_verified', '', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 0,
+    });
     return response;
   } catch (error) {
     if (error?.code === 11000) {

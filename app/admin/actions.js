@@ -155,7 +155,7 @@ export async function updateExamAction(formData) {
 
   await existingExam.save();
   await revalidateAdminAndPublicExamPaths(existingExam);
-  redirect(`/admin/builder/${existingExam._id}`);
+  redirect(`/admin/exams/${existingExam._id}/builder`);
 }
 
 export async function quickCreateExamAction() {
@@ -228,7 +228,7 @@ export async function quickCreateExamAction() {
   });
 
   await revalidateAdminAndPublicExamPaths(exam);
-  redirect(`/admin/builder/${exam._id}`);
+  redirect(`/admin/exams/${exam._id}/builder`);
 }
 
 export async function setExamStatusAction(formData) {

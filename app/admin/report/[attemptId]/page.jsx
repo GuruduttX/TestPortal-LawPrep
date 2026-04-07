@@ -2,6 +2,7 @@ import Link from 'next/link';
 import ResultClient from '@/app/result/[attemptId]/ResultClient';
 import { getAttemptDetail } from '@/lib/dashboard-data';
 import { requireAdminSession } from '@/lib/admin-auth';
+import { computeMaxPossibleMarks } from '@/lib/exam-management';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,11 @@ export default async function AdminFullReportPage({ params }) {
 
   const { attempt, exam, questions } = detail;
   const totalQ = questions?.length || 0;
-  const pct = totalQ ? Math.round((attempt.score / totalQ) * 100) : 0;
+  // Use correct max possible marks — not just question count
+  const maxPossibleMarks = computeMaxPossibleMarks(exam, totalQ);
+  const pct = maxPossibleMarks > 0
+    ? Math.max(0, Math.round((attempt.score / maxPossibleMarks) * 100))
+    : 0;
 
   // Compute correct / incorrect / skipped
   const studentAnswers = {};
@@ -75,7 +80,9 @@ export default async function AdminFullReportPage({ params }) {
           <div className="flex items-center gap-4">
             <div className="text-center px-3">
               <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.3)' }}>Score</p>
-              <p className="text-[16px] font-black text-white">{attempt.score}/{totalQ}</p>
+              <p className="text-[16px] font-black" style={{ color: attempt.score < 0 ? '#fc8181' : 'white' }}>
+                {attempt.score}/{maxPossibleMarks}
+              </p>
             </div>
             <div className="px-3 py-1.5 rounded-sm text-[14px] font-black"
               style={{ background: pctBg, color: pctColor }}>
@@ -143,6 +150,7 @@ export default async function AdminFullReportPage({ params }) {
           attempt={attempt}
           exam={exam}
           questions={questions}
+          maxPossibleMarks={maxPossibleMarks}
           isAdminView
         />
       </div>

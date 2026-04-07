@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { useRouter } from 'next/navigation';
 
 import CandidateDetailsStep from '@/app/test/components/CandidateDetailsStep';
@@ -22,6 +23,8 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [, setWarnings] = useState(0);
+  const warningCountRef = useRef(0);
+  const autoSubmitRef = useRef(false);
   const [activeSection, setActiveSection] = useState('all');
 
   const hasSections = exam.sections && exam.sections.length > 0;
@@ -158,6 +161,14 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
     return () => clearInterval(timer);
   }, [adminPreview, handleSubmitTest, isSubmitting, step, timeLeft]);
 
+  // Watch warningCountRef — auto-submit when 3 violations are reached
+  useEffect(() => {
+    if (autoSubmitRef.current) {
+      autoSubmitRef.current = false;
+      handleSubmitTest();
+    }
+  });
+
   useEffect(() => {
     if (adminPreview || step !== 4 || isSubmitting) return;
 
@@ -168,16 +179,15 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
     };
     const handleVisibilityChange = () => {
       if (!document.hidden) return;
-      setWarnings((count) => {
-        const nextCount = count + 1;
-        if (nextCount >= 3) {
-          alert('SECURITY VIOLATION: Test auto-submitted due to frequent tab switching.');
-          handleSubmitTest();
-          return nextCount;
-        }
-        alert(`WARNING ${nextCount}/3: Navigating away from the test window is prohibited.`);
-        return nextCount;
-      });
+      warningCountRef.current += 1;
+      if (warningCountRef.current >= 3) {
+        alert('SECURITY VIOLATION: Test auto-submitted due to frequent tab switching.');
+        autoSubmitRef.current = true;
+        setWarnings(warningCountRef.current); // trigger re-render so the effect above fires
+        return;
+      }
+      alert(`WARNING ${warningCountRef.current}/3: Navigating away from the test window is prohibited.`);
+      setWarnings(warningCountRef.current);
     };
     const handleKeyDown = (event) => {
       if (
@@ -190,21 +200,20 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
     };
     const handleFullscreenChange = () => {
       if (document.fullscreenElement) return;
-      setWarnings((count) => {
-        const nextCount = count + 1;
-        if (nextCount >= 3) {
-          alert('SECURITY VIOLATION: Test auto-submitted due to exiting fullscreen mode.');
-          handleSubmitTest();
-          return nextCount;
-        }
-        alert(`WARNING ${nextCount}/3: You exited fullscreen mode. Please return immediately.`);
-        try {
-          document.documentElement.requestFullscreen().catch(() => {});
-        } catch {
-          // ignore
-        }
-        return nextCount;
-      });
+      warningCountRef.current += 1;
+      if (warningCountRef.current >= 3) {
+        alert('SECURITY VIOLATION: Test auto-submitted due to exiting fullscreen mode.');
+        autoSubmitRef.current = true;
+        setWarnings(warningCountRef.current);
+        return;
+      }
+      alert(`WARNING ${warningCountRef.current}/3: You exited fullscreen mode. Please return immediately.`);
+      try {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } catch {
+        // ignore
+      }
+      setWarnings(warningCountRef.current);
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -220,14 +229,7 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
   }, [adminPreview, handleSubmitTest, isSubmitting, step]);
 
   const handleCandidateDetailsContinue = () => {
-    if (!name.trim() || !phone.trim()) {
-      setErrorMsg('Please provide both name and phone number.');
-      return;
-    }
-    if (phone.replace(/\D/g, '').length !== 10) {
-      setErrorMsg('Phone number must be exactly 10 digits.');
-      return;
-    }
+    // OTP is handled inside CandidateDetailsStep; this is called after OTP is verified
     setErrorMsg('');
     setStep(2);
   };
@@ -359,7 +361,7 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
     Object.values(statuses).forEach((value) => {
       if (value in initial) initial[value] += 1;
     });
-    initial.not_visited = questions.length - Object.keys(statuses).length + initial.not_visited;
+    initial.not_visited = Math.max(0, questions.length - Object.keys(statuses).length + initial.not_visited);
     return initial;
   }, [questions.length, statuses]);
 

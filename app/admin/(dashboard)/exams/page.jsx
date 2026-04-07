@@ -93,16 +93,20 @@ export default async function AdminExamsPage() {
             <svg className="w-12 h-12 mx-auto mb-3" style={{ color: '#dfe6e9' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="text-[14px] font-bold" style={{ color: '#636e72' }}>No examinations created yet</p>
+          <p className="text-[14px] font-bold" style={{ color: '#636e72' }}>No examinations created yet</p>
             <p className="text-[12px] mt-1" style={{ color: '#b2bec3' }}>Get started by creating your first exam</p>
-            <Link href="/admin/exams/new"
-              className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold text-white uppercase tracking-wider rounded-sm"
-              style={{ background: 'linear-gradient(135deg, #0f3460, #1a5276)' }}>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-              Create First Exam
-            </Link>
+            <form action={quickCreateExamAction} className="mt-4 inline-block">
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold text-white uppercase tracking-wider rounded-sm cursor-pointer"
+                style={{ background: 'linear-gradient(135deg, #0f3460, #1a5276)' }}
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Create First Exam
+              </button>
+            </form>
           </div>
         ) : (
           <>

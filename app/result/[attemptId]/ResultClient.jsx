@@ -6,14 +6,15 @@ export default function ResultClient({
   attempt,
   exam,
   questions,
+  maxPossibleMarks,
   isAdminView = false,
 }) {
   const [copied, setCopied] = useState(false);
 
   const totalQuestions = questions.length;
-  const percentage = totalQuestions
-    ? Math.round((attempt.score / totalQuestions) * 100)
-    : 0;
+  // maxPossibleMarks is computed server-side and passed as a prop
+  const pctDenominator = maxPossibleMarks > 0 ? maxPossibleMarks : (totalQuestions || 1);
+  const percentage = Math.max(0, Math.round((attempt.score / pctDenominator) * 100));
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -84,12 +85,19 @@ export default function ResultClient({
             <div className="col-span-1 border-l border-gray-200 md:pl-6 flex flex-col items-start justify-center">
               <div className="text-xs text-gray-500 uppercase font-semibold tracking-wider mb-1">Final Score</div>
               <div className="flex items-end space-x-3">
-                <span className={`text-4xl font-bold ${percentage >= 60 ? 'text-green-600' : 'text-blue-600'}`}>
+                <span className={`text-4xl font-bold ${percentage >= 60 ? 'text-green-600' : attempt.score < 0 ? 'text-red-600' : 'text-blue-600'}`}>
                   {percentage}%
                 </span>
                 <span className="text-gray-600 font-medium mb-1">
-                  ({attempt.score}/{totalQuestions})
+                  ({attempt.score}/{pctDenominator})
                 </span>
+              </div>
+              {/* Correct/Incorrect/Skipped mini breakdown */}
+              <div className="mt-3 text-xs text-gray-500 space-y-0.5">
+                <div><span className="text-green-600 font-bold">{correctCount}</span> correct · <span className="text-red-500 font-bold">{incorrectCount}</span> wrong · <span className="text-gray-400 font-bold">{skippedCount}</span> skipped</div>
+                {(exam?.negativeMarks > 0 || exam?.sections?.some(s => s.negativeMarks > 0)) && (
+                  <div className="text-amber-600 font-medium">Negative marking applied</div>
+                )}
               </div>
             </div>
           </div>

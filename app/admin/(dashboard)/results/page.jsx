@@ -15,24 +15,26 @@ export default async function AdminResultsPage({ searchParams }) {
   await dbConnect();
 
   const query = selectedExamId ? { examId: selectedExamId } : {};
-  const attempts = await Attempt.find(query).sort({ submittedAt: -1 }).lean();
+  const attempts = await Attempt.find(query).sort({ submittedAt: -1 }).limit(2000).lean();
 
   // Build exam lookup map
   const examMap = {};
   exams.forEach((e) => { examMap[e.id] = e; });
 
-  // Compute stats
+  // Compute stats — use exam.maxPossibleMarks as denominator (accounts for negative marking, section marks etc.)
   const totalSubmissions = attempts.length;
   const avgScore = totalSubmissions > 0
     ? (attempts.reduce((sum, a) => {
         const ex = examMap[String(a.examId)];
-        return sum + (ex && ex.questionCount ? (a.score / ex.questionCount) * 100 : 0);
+        const maxMarks = ex?.maxPossibleMarks > 0 ? ex.maxPossibleMarks : (ex?.questionCount || 1);
+        return sum + (a.score / maxMarks) * 100;
       }, 0) / totalSubmissions).toFixed(1)
     : 0;
   const highestPct = totalSubmissions > 0
     ? Math.max(...attempts.map((a) => {
         const ex = examMap[String(a.examId)];
-        return ex && ex.questionCount ? Math.round((a.score / ex.questionCount) * 100) : 0;
+        const maxMarks = ex?.maxPossibleMarks > 0 ? ex.maxPossibleMarks : (ex?.questionCount || 1);
+        return Math.max(0, Math.round((a.score / maxMarks) * 100));
       }))
     : 0;
   const examsWithSubs = new Set(attempts.map((a) => String(a.examId))).size;
@@ -172,8 +174,9 @@ export default async function AdminResultsPage({ searchParams }) {
           <div>
             {attempts.map((att, idx) => {
               const ex = examMap[String(att.examId)];
-              const totalQ = ex?.questionCount || 0;
-              const pct = totalQ ? Math.round((att.score / totalQ) * 100) : 0;
+              const maxMarks = ex?.maxPossibleMarks > 0 ? ex.maxPossibleMarks : (ex?.questionCount || 1);
+              // Clamp to 0 — score can be negative with heavy negative marking
+              const pct = Math.max(0, Math.round((att.score / maxMarks) * 100));
               const timeMins = Math.floor(att.timeTaken / 60);
               const timeSecs = att.timeTaken % 60;
 
@@ -218,12 +221,12 @@ export default async function AdminResultsPage({ searchParams }) {
 
                     {/* Phone (always visible when showing all) */}
                     <div className="text-center font-mono text-[11px]" style={{ color: '#636e72' }}>
-                      {!selectedExam ? att.studentPhone : (totalQ > 0 ? `${totalQ}Q` : '—')}
+                      {!selectedExam ? att.studentPhone : (ex?.questionCount > 0 ? `${ex.questionCount}Q` : '—')}
                     </div>
 
-                    {/* Score */}
-                    <div className="text-center font-bold" style={{ color: '#1a1a2e' }}>
-                      {att.score}/{totalQ}
+                    {/* Score — show raw marks / max possible marks */}
+                    <div className="text-center font-bold" style={{ color: att.score < 0 ? '#e94560' : '#1a1a2e' }}>
+                      {att.score}/{maxMarks}
                     </div>
 
                     {/* Percentage badge */}
@@ -274,12 +277,12 @@ export default async function AdminResultsPage({ searchParams }) {
             <div className="flex items-center gap-4">
               <span>Highest: <span style={{ color: '#27ae60' }}>
                 {Math.max(...attempts.map((a) => a.score))}/{
-                  selectedExam ? selectedExam.questionCount : '—'
+                  selectedExam ? selectedExam.maxPossibleMarks ?? selectedExam.questionCount : '—'
                 }
               </span></span>
               <span>Lowest: <span style={{ color: '#e94560' }}>
                 {Math.min(...attempts.map((a) => a.score))}/{
-                  selectedExam ? selectedExam.questionCount : '—'
+                  selectedExam ? selectedExam.maxPossibleMarks ?? selectedExam.questionCount : '—'
                 }
               </span></span>
             </div>
