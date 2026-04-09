@@ -145,9 +145,7 @@ export default function TestInterfaceStep(props) {
           <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '18px 20px 24px' }}>
             {passageText ? (
               <div style={{ fontSize: '14px', lineHeight: 1.75, color: '#212529', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{passageText}</div>
-            ) : (
-              <p style={{ margin: 0, fontSize: '13px', color: '#adb5bd', fontStyle: 'italic', lineHeight: 1.65 }}>No reading passage for this item. Add one in the question builder (Reading passage), or put passage then a line with only <strong>---</strong> then the stem in Question text.</p>
-            )}
+            ) : null}
           </div>
         </div>
 
