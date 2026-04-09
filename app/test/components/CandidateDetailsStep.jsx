@@ -115,7 +115,10 @@ export default function CandidateDetailsStep({
     if (!name.trim() || !phone.trim()) { setOtpError('Please provide both name and phone number.'); return; }
     if (phone.replace(/\D/g, '').length !== 10) { setOtpError('Phone number must be exactly 10 digits.'); return; }
     setOtpError('');
-    sendOTP();
+    
+    // BYPASS OTP UI FOR TESTING (User Request)
+    // sendOTP();
+    onContinue(); // Immediately proceed to instructions
   }
 
   const isSending   = phase === 'sending';

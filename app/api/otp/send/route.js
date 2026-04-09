@@ -23,6 +23,16 @@ export async function POST(request) {
       );
     }
 
+    // BYPASS MULTI-STEP OTP FOR TESTING (User Request)
+    // Uncomment the code below later to restore MSG91 functionality.
+    
+    return NextResponse.json({
+      success: true,
+      message: `(TEST MODE) OTP bypassed for ${phone.slice(0, 4)}••••••${phone.slice(-2)}`,
+      expiresInMinutes: 10,
+    });
+    
+    /* 
     // Read env at request time (not module load time) so hot-reload works
     const authKey    = process.env.MSG91_AUTH_KEY;
     const templateId = process.env.MSG91_TEMPLATE_ID;
@@ -46,10 +56,10 @@ export async function POST(request) {
 
     // ── MSG91 Send OTP API ─────────────────────────────────────────────────
     // authkey MUST be in the header (not query string) per MSG91 v5 API docs
-    const mobile = `91${phone}`; // country code prefix, no + sign
+    const mobile = \`91\${phone}\`; // country code prefix, no + sign
 
     const msg91Res = await fetch(
-      `https://control.msg91.com/api/v5/otp?otp_expiry=${expiry}&otp_length=6`,
+      \`https://control.msg91.com/api/v5/otp?otp_expiry=\${expiry}&otp_length=6\`,
       {
         method: 'POST',
         headers: {
@@ -65,25 +75,26 @@ export async function POST(request) {
     );
 
     let data = {};
-    try { data = await msg91Res.json(); } catch { /* empty body */ }
+    try { data = await msg91Res.json(); } catch { }
 
     console.log('[OTP Send] MSG91 response:', data);
 
     if (data?.type === 'success') {
       return NextResponse.json({
         success: true,
-        message: `OTP sent to ${mobile.slice(0, 4)}••••••${mobile.slice(-2)}`,
+        message: \`OTP sent to \${mobile.slice(0, 4)}••••••\${mobile.slice(-2)}\`,
         expiresInMinutes: expiry,
       });
     }
 
     // MSG91 error — surface a clean message
-    const errMsg = data?.message || `MSG91 returned status ${msg91Res.status}`;
+    const errMsg = data?.message || \`MSG91 returned status \${msg91Res.status}\`;
     console.error('[OTP Send] MSG91 error:', errMsg);
     return NextResponse.json(
       { success: false, message: 'Failed to send OTP. Please try again.' },
       { status: 502 }
     );
+    */
 
   } catch (err) {
     console.error('[OTP Send] Internal error:', err);

@@ -147,22 +147,22 @@ export default async function AdminExamsPage() {
 
                   {/* Status toggle */}
                   <div className="text-center flex justify-center">
-                    <form action={setExamStatusAction} className="inline">
+                    <form action={setExamStatusAction} className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
                       <input type="hidden" name="examId" value={exam.id} />
                       <input type="hidden" name="status" value={exam.status === 'published' ? 'draft' : 'published'} />
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-bold transition-all shadow-sm whitespace-nowrap"
-                        style={
-                          exam.status === 'published'
-                            ? { background: '#d4edda', color: '#155724', border: '1px solid #a3d9b1' }
-                            : { background: '#fff3cd', color: '#856404', border: '1px solid #e8c547' }
-                        }
+                        title={exam.status === 'published' ? 'Change to Draft' : 'Publish as Live'}
+                        className={`relative inline-flex h-[18px] w-8 items-center rounded-full transition-colors focus:outline-none shadow-inner ${
+                          exam.status === 'published' ? 'bg-green-500' : 'bg-gray-300'
+                        }`}
                       >
                         <span
-                          className="h-2 w-2 rounded-full shrink-0"
-                          style={{ background: exam.status === 'published' ? '#27ae60' : '#f39c12' }}
+                          className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform duration-200`}
+                          style={{ transform: `translateX(${exam.status === 'published' ? '17px' : '3px'})` }}
                         />
+                      </button>
+                      <button type="submit" className={`text-[11px] font-bold w-7 text-left ${exam.status === 'published' ? 'text-green-700' : 'text-gray-500'}`}>
                         {exam.status === 'published' ? 'Live' : 'Draft'}
                       </button>
                     </form>
@@ -170,22 +170,22 @@ export default async function AdminExamsPage() {
 
                   {/* Results toggle */}
                   <div className="text-center flex justify-center">
-                    <form action={setResultPublishAction} className="inline">
+                    <form action={setResultPublishAction} className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
                       <input type="hidden" name="examId" value={exam.id} />
                       <input type="hidden" name="resultPublished" value={exam.resultPublished ? 'false' : 'true'} />
                       <button
                         type="submit"
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-bold transition-all shadow-sm whitespace-nowrap"
-                        style={
-                          exam.resultPublished
-                            ? { background: '#d4edda', color: '#155724', border: '1px solid #a3d9b1' }
-                            : { background: '#fdecea', color: '#721c24', border: '1px solid #f0b4b4' }
-                        }
+                        title={exam.resultPublished ? 'Hide results from students' : 'Make results public'}
+                        className={`relative inline-flex h-[18px] w-8 items-center rounded-full transition-colors focus:outline-none shadow-inner ${
+                          exam.resultPublished ? 'bg-green-500' : 'bg-gray-300'
+                        }`}
                       >
                         <span
-                          className="h-2 w-2 rounded-full shrink-0"
-                          style={{ background: exam.resultPublished ? '#27ae60' : '#e94560' }}
+                          className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform duration-200`}
+                          style={{ transform: `translateX(${exam.resultPublished ? '17px' : '3px'})` }}
                         />
+                      </button>
+                      <button type="submit" className={`text-[11px] font-bold w-10 text-left ${exam.resultPublished ? 'text-green-700' : 'text-gray-500'}`}>
                         {exam.resultPublished ? 'Public' : 'Hidden'}
                       </button>
                     </form>

@@ -38,6 +38,15 @@ export async function POST(request) {
       );
     }
 
+    // BYPASS MSG91 OTP VERIFICATION FOR TESTING (User Request)
+    // Always set the secure cookie and assume success.
+    await setOTPVerifiedCookie({ phone, examSlug });
+    return NextResponse.json({
+      success: true,
+      message: '(TEST MODE) Phone number verified automatically.',
+    });
+
+    /*
     const authKey = process.env.MSG91_AUTH_KEY;
 
     if (!authKey || authKey === 'your_msg91_authkey_here') {
@@ -49,8 +58,8 @@ export async function POST(request) {
     }
 
     // ── MSG91 Verify OTP API ────────────────────────────────────────────────
-    const mobile = `91${phone}`;
-    const url = `https://control.msg91.com/api/v5/otp/verify?mobile=${mobile}&otp=${encodeURIComponent(otp)}`;
+    const mobile = \`91\${phone}\`;
+    const url = \`https://control.msg91.com/api/v5/otp/verify?mobile=\${mobile}&otp=\${encodeURIComponent(otp)}\`;
 
     const msg91Res = await fetch(url, {
       method: 'GET',
@@ -61,7 +70,7 @@ export async function POST(request) {
     });
 
     let data = {};
-    try { data = await msg91Res.json(); } catch { /* empty body */ }
+    try { data = await msg91Res.json(); } catch { }
 
     console.log('[OTP Verify] MSG91 response:', data);
 
@@ -93,6 +102,7 @@ export async function POST(request) {
 
     console.error('[OTP Verify] Failed:', data?.message);
     return NextResponse.json({ success: false, message: userMsg }, { status: 400 });
+    */
 
   } catch (err) {
     console.error('[OTP Verify] Internal error:', err);
