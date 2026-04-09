@@ -22,8 +22,13 @@ export default async function ExamsListingPage() {
                 SECURE TESTING ENVIRONMENT • VERIFIED CANDIDATE ACCESS
               </p>
             </div>
-            <div className="text-[11px] font-bold text-[#155724] uppercase bg-[#d4edda] px-3 py-1.5 border border-[#28a745]">
-              Status: Connected Safely
+            <div className="flex items-center gap-3">
+              <div className="text-[11px] font-bold text-[#155724] uppercase bg-[#d4edda] px-3 py-1.5 border border-[#28a745]">
+                Status: Connected Safely
+              </div>
+              <Link href="/admin" className="text-[11px] font-bold text-black uppercase bg-white px-3 py-1.5 border border-black hover:bg-gray-100 transition-colors shadow-sm">
+                Admin Login
+              </Link>
             </div>
           </div>
         </div>

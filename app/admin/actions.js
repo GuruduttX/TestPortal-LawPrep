@@ -79,7 +79,7 @@ async function revalidateAdminAndPublicExamPaths(exam) {
   revalidatePath('/admin/exams');
   revalidatePath('/admin/results');
   revalidatePath(`/admin/exams/${exam._id}`);
-  revalidatePath(`/admin/exams/${exam._id}/builder`);
+  revalidatePath(`/admin/builder/${exam._id}`);
   revalidatePath('/exams');
   revalidatePath('/test');
   revalidatePath(`/exam/${exam.slug}`);
@@ -155,7 +155,7 @@ export async function updateExamAction(formData) {
 
   await existingExam.save();
   await revalidateAdminAndPublicExamPaths(existingExam);
-  redirect(`/admin/exams/${existingExam._id}/builder`);
+  redirect(`/admin/builder/${existingExam._id}`);
 }
 
 export async function quickCreateExamAction() {
@@ -228,7 +228,7 @@ export async function quickCreateExamAction() {
   });
 
   await revalidateAdminAndPublicExamPaths(exam);
-  redirect(`/admin/exams/${exam._id}/builder`);
+  redirect(`/admin/builder/${exam._id}`);
 }
 
 export async function setExamStatusAction(formData) {
@@ -416,7 +416,7 @@ export async function createQuestionAction(formData) {
   });
 
   await revalidateAdminAndPublicExamPaths(exam);
-  redirect(`/admin/exams/${exam._id}/builder?q=${created._id.toString()}`);
+  redirect(`/admin/builder/${exam._id}?q=${created._id.toString()}`);
 }
 
 export async function updateQuestionAction(formData) {
@@ -471,7 +471,7 @@ export async function updateQuestionAction(formData) {
 
   await question.save();
   await revalidateAdminAndPublicExamPaths(exam);
-  redirect(`/admin/exams/${exam._id}/builder?q=${questionId}`);
+  redirect(`/admin/builder/${exam._id}?q=${questionId}`);
 }
 
 export async function deleteQuestionAction(formData) {
@@ -495,5 +495,5 @@ export async function deleteQuestionAction(formData) {
 
   const nextQ = await Question.findOne({ examId }).sort({ questionNumber: 1 }).lean();
   const qParam = nextQ ? String(nextQ._id) : 'new';
-  redirect(`/admin/exams/${exam._id}/builder?q=${qParam}`);
+  redirect(`/admin/builder/${exam._id}?q=${qParam}`);
 }

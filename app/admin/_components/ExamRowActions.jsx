@@ -1,13 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-
+import { useState } from 'react';
 import { deleteExamAction, duplicateExamAction } from '@/app/admin/actions';
 
 const btnBase =
-  'inline-flex shrink-0 items-center justify-center gap-1.5 min-h-8 px-2.5 rounded-md text-[10px] font-bold uppercase tracking-wide transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0f3460] focus-visible:ring-offset-1';
+  'inline-flex shrink-0 items-center justify-center gap-1.5 h-8 px-3 rounded-md text-[13px] font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-black';
 
 export default function ExamRowActions({ examId, examSlug }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyTestLink = () => {
+    const url = `${window.location.origin}/exam/${examSlug}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div
       className="flex flex-wrap justify-end gap-2 min-w-0 ml-auto"
@@ -17,45 +26,46 @@ export default function ExamRowActions({ examId, examSlug }) {
       <Link
         href={`/admin/builder/${examId}`}
         title="Exam settings, instructions, and questions"
-        className={`${btnBase} border border-[#0a2540] bg-[#0f3460] text-white hover:bg-[#1a5276] shadow-sm`}
+        className={`${btnBase} !text-black !border-gray-300 hover:!bg-gray-100`}
       >
-        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
-          />
+        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
         </svg>
-        Questions
+        Editor
       </Link>
+
+      <button
+        onClick={copyTestLink}
+        title="Copy direct link to this exam to paste on your site"
+        className={btnBase}
+      >
+        {copied ? (
+          <svg className="w-4 h-4 shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          </svg>
+        )}
+        {copied ? 'Copied!' : 'Copy Link'}
+      </button>
 
       <form
         action={duplicateExamAction}
         className="inline-flex shrink-0"
         onSubmit={(e) => {
-          if (
-            !confirm(
-              'Create a full duplicate of this exam (all questions)? The copy is saved as Draft with results hidden; you can edit and publish it separately.'
-            )
-          ) {
+          if (!confirm('Create a full duplicate of this exam?')) {
             e.preventDefault();
           }
         }}
       >
         <input type="hidden" name="examId" value={examId} />
-        <button
-          type="submit"
-          title="Duplicate exam and all questions (submissions are not copied)"
-          className={`${btnBase} cursor-pointer border border-[#7d3c98] bg-white text-[#7d3c98] hover:bg-[#f4eef8] shadow-sm`}
-        >
-          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-            />
+        <button type="submit" title="Duplicate exam" className={btnBase}>
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
           </svg>
-          Copy
+          Duplicate
         </button>
       </form>
 
@@ -63,10 +73,10 @@ export default function ExamRowActions({ examId, examSlug }) {
         href={`/exam/${examSlug}?preview=1`}
         target="_blank"
         rel="noopener noreferrer"
-        title="Student-style preview (no candidate form; no submission)"
-        className={`${btnBase} border border-[#219653] bg-white text-[#219653] hover:bg-[#e8f5e9] shadow-sm`}
+        title="Preview exam as candidate"
+        className={btnBase}
       >
-        <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
@@ -77,7 +87,7 @@ export default function ExamRowActions({ examId, examSlug }) {
         action={deleteExamAction}
         className="inline-flex shrink-0"
         onSubmit={(e) => {
-          if (!confirm('Delete this exam and all its questions & submissions?')) {
+          if (!confirm('Delete this exam completely?')) {
             e.preventDefault();
           }
         }}
@@ -85,14 +95,10 @@ export default function ExamRowActions({ examId, examSlug }) {
         <input type="hidden" name="examId" value={examId} />
         <button
           type="submit"
-          className={`${btnBase} cursor-pointer border border-[#c0392b] bg-[#e94560] text-white hover:bg-[#d63031] shadow-sm`}
+          className={`${btnBase} hover:!text-red-700 hover:!border-red-200 hover:!bg-red-50`}
         >
-          <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-            />
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
           </svg>
           Delete
         </button>
