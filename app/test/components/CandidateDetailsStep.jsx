@@ -23,6 +23,15 @@ export default function CandidateDetailsStep({
   const inputRefs = useRef([]);
   const cooldownRef = useRef(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   /* ── cooldown timer ── */
   useEffect(() => {
     if (cooldown <= 0) { clearInterval(cooldownRef.current); return; }
@@ -132,13 +141,13 @@ export default function CandidateDetailsStep({
   return (
     <div style={{ minHeight: '100vh', background: '#f6f7fb', fontFamily: 'Arial, Helvetica, sans-serif', color: '#333' }}>
       {/* Yellow exam title bar */}
-      <div style={{ background: '#FFD700', padding: '12px 0', borderBottom: '3px solid #e6c200' }}>
+      <div style={{ background: '#FFD700', padding: isMobile ? '8px 0' : '12px 0', borderBottom: '3px solid #e6c200' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '18px', fontWeight: 'bold', color: '#000', margin: 0 }}>{exam.title}</h1>
+          <h1 style={{ fontSize: isMobile ? '15px' : '18px', fontWeight: 'bold', color: '#000', margin: 0 }}>{exam.title}</h1>
         </div>
       </div>
 
-      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '24px 18px' }}>
+      <div style={{ maxWidth: '1080px', margin: '0 auto', padding: isMobile ? '12px 12px' : '24px 18px' }}>
 
         {/* Section header bar */}
         <div style={{ marginBottom: '16px', border: '1px solid #e5e7eb', background: '#fff', padding: '14px 16px' }}>
@@ -147,14 +156,14 @@ export default function CandidateDetailsStep({
           </div>
           <div style={{ marginTop: '6px', fontSize: '13px', color: '#6b7280', lineHeight: 1.55 }}>
             {inOTPMode
-              ? <>A 6-digit OTP has been sent to <strong style={{ color: '#111827' }}>{maskedPhone}</strong>. Enter it below to verify your identity.</>
-              : 'Enter your details as per registration record. These details are used for attempt verification and result mapping.'
+              ? <>A 6-digit OTP has been sent to <strong style={{ color: '#111827' }}>{maskedPhone}</strong>. Enter it below.</>
+              : 'Enter your details to proceed with the assessment.'
             }
           </div>
         </div>
 
         {/* Main grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: '16px' }}>
 
           {/* LEFT CARD — switches between details & OTP */}
           <div style={{ border: '1px solid #d1d5db', background: '#fff' }}>
@@ -164,7 +173,7 @@ export default function CandidateDetailsStep({
 
             {/* ── DETAILS PHASE ── */}
             {!inOTPMode && (
-              <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
                     Full Name *
@@ -178,7 +187,7 @@ export default function CandidateDetailsStep({
                   </label>
                   <input type="tel" required inputMode="numeric" maxLength={10} value={phone}
                     onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    placeholder="Enter 10 digit phone number" style={inputBase} />
+                    placeholder="Enter 10 digit phone" style={inputBase} />
                 </div>
               </div>
             )}
@@ -195,20 +204,17 @@ export default function CandidateDetailsStep({
                     <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827' }}>{name}</div>
                     <div style={{ fontSize: '11px', color: '#9ca3af', fontFamily: 'monospace' }}>{maskedPhone}</div>
                   </div>
-                  {isVerified
-                    ? <span style={{ fontSize: '10px', fontWeight: 700, color: '#155724', background: '#d4edda', border: '1px solid #a3d9b1', padding: '3px 10px' }}>✓ Verified</span>
-                    : <span style={{ fontSize: '10px', fontWeight: 700, color: '#856404', background: '#fff3cd', border: '1px solid #ffc107', padding: '3px 10px' }}>OTP Sent</span>
-                  }
+                  {isVerified && <span style={{ fontSize: '10px', fontWeight: 700, color: '#155724', background: '#d4edda', border: '1px solid #a3d9b1', padding: '3px 10px' }}>✓ Verified</span>}
                 </div>
 
                 {/* OTP label */}
                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '10px', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                  6-Digit Verification Code
+                  Verification Code
                 </label>
 
                 {/* OTP boxes */}
                 <div
-                  style={{ display: 'flex', gap: '10px', marginBottom: '16px', ...(shake ? { animation: 'shake 0.5s ease' } : {}) }}
+                  style={{ display: 'flex', gap: isMobile ? '6px' : '10px', justifyContent: 'center', marginBottom: '16px', ...(shake ? { animation: 'shake 0.5s ease' } : {}) }}
                 >
                   <style>{`
                     @keyframes shake {
@@ -228,8 +234,8 @@ export default function CandidateDetailsStep({
                       onPaste={idx === 0 ? handlePaste : undefined}
                       disabled={isVerifying || isSending || isVerified}
                       style={{
-                        width: '48px', height: '52px', textAlign: 'center',
-                        fontSize: '22px', fontWeight: 800, fontFamily: 'monospace',
+                        width: isMobile ? '38px' : '48px', height: isMobile ? '44px' : '52px', textAlign: 'center',
+                        fontSize: isMobile ? '18px' : '22px', fontWeight: 800, fontFamily: 'monospace',
                         border: `2px solid ${otpError ? '#e94560' : digit ? '#1a1a2e' : '#d1d5db'}`,
                         background: isVerified ? '#d4edda' : digit ? '#f0f4ff' : '#fafafa',
                         color: otpError ? '#e94560' : isVerified ? '#155724' : '#1a1a2e',
@@ -243,40 +249,35 @@ export default function CandidateDetailsStep({
 
                 {/* OTP Error */}
                 {otpError && (
-                  <div style={{ marginBottom: '12px', padding: '9px 12px', background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24', fontSize: '12px', fontWeight: 600 }}>
+                  <div style={{ marginBottom: '12px', padding: '9px 12px', background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24', fontSize: '11px', fontWeight: 600 }}>
                     {otpError}
                   </div>
                 )}
 
                 {/* Resend row */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
-                  <span style={{ fontSize: '12px', color: '#9ca3af' }}>
+                  <span style={{ fontSize: '11px', color: '#9ca3af' }}>
                     {cooldown > 0
                       ? <>Resend in <strong style={{ color: '#374151', fontVariantNumeric: 'tabular-nums' }}>{cooldown}s</strong></>
-                      : "Didn't receive it?"
+                      : "Didn't receive code?"
                     }
                   </span>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    {[['text', 'Resend SMS'], ['voice', 'Call Me']].map(([type, label]) => (
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    {[['text', 'SMS'], ['voice', 'Call']].map(([type, label]) => (
                       <button key={type} onClick={() => resendOTP(type)}
                         disabled={cooldown > 0 || isSending || isVerified}
-                        style={{ padding: '5px 12px', fontSize: '11px', fontWeight: 700, border: `1px solid ${cooldown > 0 || isSending ? '#e5e7eb' : '#d1d5db'}`, background: '#fff', color: cooldown > 0 || isSending ? '#9ca3af' : '#374151', cursor: cooldown > 0 || isSending || isVerified ? 'not-allowed' : 'pointer', borderRadius: '2px' }}>
+                        style={{ padding: '4px 10px', fontSize: '10px', fontWeight: 700, border: '1px solid #d1d5db', background: '#fff', color: cooldown > 0 || isSending ? '#9ca3af' : '#374151', cursor: cooldown > 0 || isSending || isVerified ? 'not-allowed' : 'pointer', borderRadius: '2px' }}>
                         {label}
                       </button>
                     ))}
                   </div>
-                </div>
-
-                {/* Security note */}
-                <div style={{ marginTop: '16px', borderTop: '1px solid #f0f2f8', paddingTop: '12px', fontSize: '11px', color: '#9ca3af', lineHeight: 1.6 }}>
-                  🔒 This OTP is valid for {process.env.NEXT_PUBLIC_OTP_EXPIRY || '10'} minutes. Do not share it with anyone.
                 </div>
               </div>
             )}
           </div>
 
           {/* RIGHT CARD — Exam Snapshot (always visible) */}
-          <div style={{ border: '1px solid #d1d5db', background: '#fff', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ border: '1px solid #d1d5db', background: '#fff' }}>
             <div style={{ background: '#f3f4f6', padding: '10px 14px', borderBottom: '1px solid #d1d5db', fontWeight: 'bold', fontSize: '13px' }}>
               Exam Snapshot
             </div>
@@ -285,7 +286,6 @@ export default function CandidateDetailsStep({
                 ['Duration', `${exam.durationMinutes} min`],
                 ['Questions', exam.totalQuestionsOverride ?? '--'],
                 ['Sections', sectionsCount],
-                ['Negative Marking', exam.negativeMarks ?? 0],
               ].map(([label, val]) => (
                 <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                   <span style={{ color: '#6b7280' }}>{label}</span>
@@ -293,66 +293,49 @@ export default function CandidateDetailsStep({
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 'auto', padding: '12px 14px', borderTop: '1px solid #e5e7eb', fontSize: '12px', color: '#6b7280', lineHeight: 1.5 }}>
-              {inOTPMode
-                ? 'Do not close or refresh this page during verification.'
-                : 'Keep your ID and registered phone nearby for verification in case of support checks.'
-              }
-            </div>
           </div>
         </div>
 
-        {/* Error message (details phase) */}
-        {(errorMsg || (!inOTPMode && otpError)) && (
-          <div style={{ marginTop: '14px', background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24', padding: '10px 16px', fontSize: '13px', fontWeight: 'bold' }}>
-            {errorMsg || otpError}
-          </div>
-        )}
-
-        {/* Footer bar */}
-        <div style={{ marginTop: '14px', background: '#fff', border: '1px solid #d1d5db', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#374151', fontSize: '13px' }}>
-            <span style={{ background: '#d4edda', border: '1px solid #28a745', color: '#155724', fontWeight: 700, padding: '4px 8px' }}>
+        {/* Action / Navigation Footer */}
+        <div style={{ marginTop: '16px', background: '#fff', border: '1px solid #d1d5db', padding: '14px 16px', display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#374151', fontSize: '12px' }}>
+            <span style={{ background: '#d4edda', border: '1px solid #28a745', color: '#155724', fontWeight: 700, padding: '3px 8px' }}>
               Step 1 of 4
             </span>
-            <span>
-              {inOTPMode ? 'Verify your mobile number to continue' : 'Enter your details — OTP will be sent for verification'}
-            </span>
+            <span>Registration details</span>
           </div>
 
-          {/* Action button */}
+          {/* Action buttons */}
           {!inOTPMode && (
             <button
               onClick={handleContinueClick}
-              style={{ padding: '11px 28px', fontSize: '14px', fontWeight: 'bold', background: '#222', color: '#fff', border: '1px solid #111', cursor: 'pointer', borderRadius: '2px', letterSpacing: '0.2px' }}
+              style={{ padding: '12px 32px', fontSize: '14px', fontWeight: 'bold', background: '#222', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '2px' }}
             >
-              {isSending ? 'Sending OTP…' : 'Continue to Instructions'}
+              {isSending ? 'Sending...' : 'Continue →'}
             </button>
           )}
 
           {inOTPMode && (
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              {/* Back button */}
+            <div style={{ display: 'flex', gap: '10px' }}>
               {!isVerified && (
                 <button
                   onClick={() => { setPhase('details'); setOtp(['', '', '', '', '', '']); setOtpError(''); }}
                   disabled={isVerifying || isSending}
-                  style={{ padding: '9px 18px', fontSize: '13px', fontWeight: 700, background: '#fff', color: '#374151', border: '1px solid #d1d5db', cursor: isVerifying || isSending ? 'not-allowed' : 'pointer', borderRadius: '2px' }}
+                  style={{ flex: 1, padding: '10px 16px', fontSize: '13px', fontWeight: 700, background: '#fff', color: '#374151', border: '1px solid #d1d5db', borderRadius: '2px' }}
                 >
                   ← Back
                 </button>
               )}
-              {/* Verify button */}
               <button
                 onClick={() => verifyOTP()}
                 disabled={!otpFilled || isVerifying || isSending || isVerified}
                 style={{
-                  padding: '11px 28px', fontSize: '14px', fontWeight: 'bold',
+                  flex: isMobile ? 2 : 'none', padding: '12px 32px', fontSize: '14px', fontWeight: 'bold',
                   background: isVerified ? '#27ae60' : otpFilled && !isVerifying && !isSending ? '#222' : '#9ca3af',
-                  color: '#fff', border: 'none', cursor: !otpFilled || isVerifying || isSending || isVerified ? 'not-allowed' : 'pointer', borderRadius: '2px', letterSpacing: '0.2px',
+                  color: '#fff', border: 'none', borderRadius: '2px',
                 }}
               >
-                {isVerified ? '✓ Verified!' : isVerifying ? 'Verifying…' : 'Verify & Proceed →'}
+                {isVerified ? '✓' : isVerifying ? '...' : 'Verify →'}
               </button>
             </div>
           )}

@@ -33,80 +33,98 @@ const navItems = [
   },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ isOpen, onClose }) {
   const pathname = usePathname();
 
   return (
-    <aside
-      className="fixed inset-y-0 left-0 z-40 flex w-[240px] flex-col"
-      style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)' }}
-    >
-      {/* Brand */}
-      <div className="px-5 pt-6 pb-5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="flex items-center gap-3">
-          <div
-            className="h-10 w-10 rounded-md flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #e94560 0%, #c0392b 100%)', boxShadow: '0 4px 12px rgba(233,69,96,0.35)' }}
-          >
-            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 14l9-5-9-5-9 5 9 5z" />
-              <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+    <>
+      {/* Mobile Overlay */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 md:hidden ${
+          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={onClose}
+      />
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-[240px] flex-col transition-transform duration-300 md:translate-x-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%)' }}
+      >
+        {/* Brand */}
+        <div className="px-5 pt-6 pb-5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center gap-3">
+            <div
+              className="h-10 w-10 rounded-md flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #e94560 0%, #c0392b 100%)', boxShadow: '0 4px 12px rgba(233,69,96,0.35)' }}
+            >
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-extrabold text-white tracking-wide">EXAM SYSTEM</p>
+              <p className="text-[9px] font-bold tracking-widest uppercase" style={{ color: '#e94560' }}>Admin Panel</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="md:hidden text-white/50 hover:text-white">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </div>
-          <div>
-            <p className="text-sm font-extrabold text-white tracking-wide">EXAM SYSTEM</p>
-            <p className="text-[9px] font-bold tracking-widest uppercase" style={{ color: '#e94560' }}>Admin Control Panel</p>
-          </div>
+          </button>
         </div>
-      </div>
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 pt-4">
-        <p className="px-3 mb-3 text-[9px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>Main Menu</p>
-        <div className="space-y-1">
-          {navItems.map((item) => {
-            const isActive =
-              item.href === '/admin'
-                ? pathname === '/admin'
-                : pathname.startsWith(item.href);
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-3 pt-4">
+          <p className="px-3 mb-3 text-[9px] font-bold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>Main Menu</p>
+          <div className="space-y-1">
+            {navItems.map((item) => {
+              const isActive =
+                item.href === '/admin'
+                  ? pathname === '/admin'
+                  : pathname.startsWith(item.href);
 
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="flex items-center gap-3 px-4 py-3 text-[13px] font-semibold transition-all duration-150"
-                style={isActive ? {
-                  background: 'linear-gradient(90deg, rgba(233,69,96,0.15), rgba(233,69,96,0.05))',
-                  borderLeft: '3px solid #e94560',
-                  color: '#ffffff',
-                } : {
-                  borderLeft: '3px solid transparent',
-                  color: 'rgba(255,255,255,0.4)',
-                }}
-              >
-                <span style={{ color: isActive ? '#e94560' : 'rgba(255,255,255,0.3)' }}>
-                  {item.icon}
-                </span>
-                {item.name}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => onClose?.()}
+                  className="flex items-center gap-3 px-4 py-3 text-[13px] font-semibold transition-all duration-150"
+                  style={isActive ? {
+                    background: 'linear-gradient(90deg, rgba(233,69,96,0.15), rgba(233,69,96,0.05))',
+                    borderLeft: '3px solid #e94560',
+                    color: '#ffffff',
+                  } : {
+                    borderLeft: '3px solid transparent',
+                    color: 'rgba(255,255,255,0.4)',
+                  }}
+                >
+                  <span style={{ color: isActive ? '#e94560' : 'rgba(255,255,255,0.3)' }}>
+                    {item.icon}
+                  </span>
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
 
-      {/* Footer */}
-      <div className="px-5 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="flex items-center gap-2.5">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
-          </span>
-          <div>
-            <span className="text-[11px] font-bold text-green-400">System Online</span>
-            <p className="text-[9px] font-medium" style={{ color: 'rgba(255,255,255,0.2)' }}>Exam Portal v2.0</p>
+        {/* Footer */}
+        <div className="px-5 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+            </span>
+            <div>
+              <span className="text-[11px] font-bold text-green-400">System Online</span>
+              <p className="text-[9px] font-medium" style={{ color: 'rgba(255,255,255,0.2)' }}>Portal v2.0</p>
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

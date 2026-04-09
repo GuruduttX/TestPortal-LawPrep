@@ -24,8 +24,9 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
   const [errorMsg, setErrorMsg] = useState('');
   const [, setWarnings] = useState(0);
   const warningCountRef = useRef(0);
-  const autoSubmitRef = useRef(false);
+  const [autoSubmitRef] = useState({ current: false });
   const [activeSection, setActiveSection] = useState('all');
+  const [mobileActiveTab, setMobileActiveTab] = useState('question'); // 'passage' | 'question' | 'palette'
 
   const hasSections = exam.sections && exam.sections.length > 0;
   const sectionNames = hasSections ? exam.sections.map((s) => s.name) : [];
@@ -429,6 +430,8 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
       onJumpToQuestion={jumpToQuestion}
       onSubmit={handleSubmitTest}
       onEndPreview={handleEndPreview}
+      mobileActiveTab={mobileActiveTab}
+      setMobileActiveTab={setMobileActiveTab}
     />
   );
 }

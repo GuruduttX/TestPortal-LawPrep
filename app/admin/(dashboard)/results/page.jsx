@@ -58,7 +58,7 @@ export default async function AdminResultsPage({ searchParams }) {
   return (
     <div className="space-y-4">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-extrabold tracking-tight" style={{ color: '#1a1a2e' }}>Results & Analysis</h1>
           <p className="text-[12px] font-medium mt-0.5" style={{ color: '#636e72' }}>
@@ -70,7 +70,7 @@ export default async function AdminResultsPage({ searchParams }) {
             <input type="hidden" name="examId" value={selectedExam.id} />
             <input type="hidden" name="resultPublished" value={selectedExam.resultPublished ? 'false' : 'true'} />
             <button type="submit"
-              className="text-[11px] font-extrabold px-4 py-2 rounded-sm uppercase tracking-wider transition-all"
+              className="w-full sm:w-auto text-[11px] font-extrabold px-4 py-2 rounded-sm uppercase tracking-wider transition-all"
               style={selectedExam.resultPublished
                 ? { background: '#f8d7da', color: '#721c24', border: '2px solid #f5c6cb' }
                 : { background: '#d4edda', color: '#155724', border: '2px solid #a3d9b1' }
@@ -82,7 +82,7 @@ export default async function AdminResultsPage({ searchParams }) {
       </div>
 
       {/* Stats Strip */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'Total Submissions', value: totalSubmissions, border: '#0f3460' },
           { label: 'Exams w/ Submissions', value: examsWithSubs, border: '#27ae60' },
@@ -165,30 +165,31 @@ export default async function AdminResultsPage({ searchParams }) {
           </span>
         </div>
 
-        {/* Column headers — fixed, compact */}
-        <div className="px-4 py-2" style={{ background: '#f0f3f8', borderBottom: '2px solid #0f3460' }}>
-          <div className="grid gap-2 items-center text-[9px] font-extrabold uppercase tracking-widest"
-            style={{ color: '#636e72', gridTemplateColumns: '40px 1fr 1fr 120px 80px 70px 80px 130px 60px' }}>
-            <div className="text-center">#</div>
-            <div>Candidate Name</div>
-            {!selectedExam && <div>Exam</div>}
-            {selectedExam && <div>Phone Number</div>}
-            <div className="text-center">Phone</div>
-            <div className="text-center">Score</div>
-            <div className="text-center">%</div>
-            <div className="text-center">Time</div>
-            <div>Submitted</div>
-            <div className="text-center">Action</div>
+        <div className="overflow-x-auto">
+          {/* Column headers — fixed, compact */}
+          <div className="px-4 py-2 min-w-[900px]" style={{ background: '#f0f3f8', borderBottom: '2px solid #0f3460' }}>
+            <div className="grid gap-2 items-center text-[9px] font-extrabold uppercase tracking-widest"
+              style={{ color: '#636e72', gridTemplateColumns: '40px 1fr 1fr 120px 80px 70px 80px 130px 60px' }}>
+              <div className="text-center">#</div>
+              <div>Candidate Name</div>
+              {!selectedExam && <div>Exam</div>}
+              {selectedExam && <div>Phone Number</div>}
+              <div className="text-center">Phone</div>
+              <div className="text-center">Score</div>
+              <div className="text-center">%</div>
+              <div className="text-center">Time</div>
+              <div>Submitted</div>
+              <div className="text-center">Action</div>
+            </div>
           </div>
-        </div>
 
-        {attempts.length === 0 ? (
-          <div className="px-4 py-16 text-center text-[13px]" style={{ color: '#b2bec3' }}>
-            No submissions found.
-          </div>
-        ) : (
-          <div>
-            {attempts.map((att, idx) => {
+          {attempts.length === 0 ? (
+            <div className="px-4 py-16 text-center text-[13px] min-w-[900px]" style={{ color: '#b2bec3' }}>
+              No submissions found.
+            </div>
+          ) : (
+            <div className="min-w-[900px]">
+              {attempts.map((att, idx) => {
               const ex = examMap[String(att.examId)];
               const maxMarks = ex?.maxPossibleMarks > 0 ? ex.maxPossibleMarks : (ex?.questionCount || 1);
               // Clamp to 0 — score can be negative with heavy negative marking
@@ -280,6 +281,7 @@ export default async function AdminResultsPage({ searchParams }) {
             })}
           </div>
         )}
+        </div>
 
         {/* Footer */}
         {attempts.length > 0 && (

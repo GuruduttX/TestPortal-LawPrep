@@ -19,14 +19,14 @@ export default async function AdminExamsPage() {
   return (
     <div className="space-y-5">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-extrabold tracking-tight" style={{ color: '#1a1a2e' }}>Exam Management</h1>
           <p className="text-[12px] font-medium mt-0.5" style={{ color: '#636e72' }}>Manage all examinations</p>
         </div>
         <form action={quickCreateExamAction}>
           <button type="submit"
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-[11px] font-bold text-white tracking-wide uppercase rounded-sm transition-all hover:opacity-90 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 text-[11px] font-bold text-white tracking-wide uppercase rounded-sm transition-all hover:opacity-90 cursor-pointer"
             style={{ background: 'linear-gradient(135deg, #0f3460, #1a5276)', boxShadow: '0 2px 8px rgba(15,52,96,0.3)' }}>
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -37,7 +37,7 @@ export default async function AdminExamsPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'Total Exams', value: exams.length, border: '#0f3460' },
           { label: 'Live', value: liveCount, border: '#27ae60' },

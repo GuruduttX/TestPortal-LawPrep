@@ -32,10 +32,10 @@ export default function ResultFilters({ selectedExamId }) {
   const downloadUrl = `/api/admin/results/download?${searchParams.toString()}`;
 
   return (
-    <div className="bg-white p-4 space-y-4" style={{ border: '1px solid #dfe6e9', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-      <div className="flex flex-wrap items-end gap-4">
+    <div className="bg-white p-3 sm:p-4 space-y-4" style={{ border: '1px solid #dfe6e9', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+      <div className="flex flex-col lg:flex-row lg:items-end gap-4">
         {/* Name Search */}
-        <div className="flex-1 min-w-[200px]">
+        <div className="w-full lg:flex-1">
           <label className="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style={{ color: '#636e72' }}>
             Search Candidate
           </label>
@@ -61,7 +61,7 @@ export default function ResultFilters({ selectedExamId }) {
         </div>
 
         {/* Date Filter */}
-        <div className="w-[180px]">
+        <div className="w-full lg:w-[180px]">
           <label className="block text-[10px] font-extrabold uppercase tracking-widest mb-1.5" style={{ color: '#636e72' }}>
             Submission Date
           </label>
@@ -82,9 +82,10 @@ export default function ResultFilters({ selectedExamId }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full lg:w-auto">
           <button
             onClick={handleApply}
+            className="flex-1 lg:flex-none"
             style={{
               background: '#0f3460',
               color: '#fff',
@@ -100,6 +101,7 @@ export default function ResultFilters({ selectedExamId }) {
           </button>
           <button
             onClick={handleReset}
+            className="flex-1 lg:flex-none"
             style={{
               background: '#f1f2f6',
               color: '#57606f',
@@ -116,14 +118,12 @@ export default function ResultFilters({ selectedExamId }) {
         </div>
 
         {/* Export Button */}
-        <div className="ml-auto">
+        <div className="w-full lg:ml-auto lg:w-auto">
           <a
             href={downloadUrl}
             download
+            className="flex items-center justify-center gap-2 w-full lg:w-auto"
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
               background: '#27ae60',
               color: '#fff',
               padding: '8px 24px',
@@ -138,7 +138,7 @@ export default function ResultFilters({ selectedExamId }) {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Download Excel (CSV)
+            Download Report
           </a>
         </div>
       </div>
