@@ -10,6 +10,7 @@ dotenv.config({ path: resolve(__dirname, '../.env.local') });
 
 const SectionSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  totalQuestions: { type: Number, default: null },
   marksPerQuestion: { type: Number, default: 1 },
   negativeMarks: { type: Number, default: 0 },
 }, { _id: false });
@@ -30,6 +31,11 @@ const ExamSchema = new mongoose.Schema(
       type: [SectionSchema],
       default: [],
     },
+    totalQuestionsOverride: { type: Number, default: null },
+    totalMarksOverride: { type: Number, default: null },
+    totalSectionsOverride: { type: Number, default: null },
+    marksPerQuestion: { type: Number, default: 1 },
+    negativeMarks: { type: Number, default: 0 },
     resultPublished: { type: Boolean, default: false },
   },
   { timestamps: true }
@@ -133,8 +139,14 @@ async function seed() {
     durationMinutes: 60,
     status: 'published',
     resultPublished: false,
+    totalQuestionsOverride: 60,
+    totalMarksOverride: 60,
+    totalSectionsOverride: 5,
+    marksPerQuestion: 1,
+    negativeMarks: 0,
     sections: sectionsConfig.map(s => ({
       name: s.name,
+      totalQuestions: s.questionCount,
       marksPerQuestion: s.marksPerQuestion,
       negativeMarks: s.negativeMarks
     }))

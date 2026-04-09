@@ -4,17 +4,30 @@ import { setResultPublishAction } from '@/app/admin/actions';
 import { getExamSummaries } from '@/lib/dashboard-data';
 import dbConnect from '@/lib/mongodb';
 import Attempt from '@/lib/models/Attempt';
+import ResultFilters from './ResultFilters';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminResultsPage({ searchParams }) {
   const params = await searchParams;
   const selectedExamId = params?.exam || '';
+  const searchName = params?.search || '';
+  const searchDate = params?.date || '';
   const exams = await getExamSummaries();
 
   await dbConnect();
 
-  const query = selectedExamId ? { examId: selectedExamId } : {};
+  const query = {};
+  if (selectedExamId) query.examId = selectedExamId;
+  if (searchName) query.studentName = { $regex: searchName, $options: 'i' };
+  if (searchDate) {
+    const start = new Date(searchDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(searchDate);
+    end.setHours(23, 59, 59, 999);
+    query.submittedAt = { $gte: start, $lte: end };
+  }
+
   const attempts = await Attempt.find(query).sort({ submittedAt: -1 }).limit(2000).lean();
 
   // Build exam lookup map
@@ -83,6 +96,9 @@ export default async function AdminResultsPage({ searchParams }) {
           </div>
         ))}
       </div>
+
+        {/* Professional Filters & Export */}
+        <ResultFilters selectedExamId={selectedExamId} />
 
       {/* Filter + Publish Controls */}
       <div className="bg-white overflow-hidden" style={{ border: '1px solid #dfe6e9' }}>
