@@ -13,6 +13,7 @@ export default function CandidateDetailsStep({
   errorMsg,
   onContinue,   // called only after OTP verified
 }) {
+  const isOTPEnabled = process.env.NEXT_PUBLIC_OTP_ENABLED === 'true';
   const sectionsCount = exam?.sections?.length || 0;
   const examSlug = exam?.slug || '';
   const [phase, setPhase] = useState('details'); // 'details' | 'sending' | 'otp' | 'verifying' | 'verified'
@@ -125,15 +126,17 @@ export default function CandidateDetailsStep({
     if (phone.replace(/\D/g, '').length !== 10) { setOtpError('Phone number must be exactly 10 digits.'); return; }
     setOtpError('');
     
-    // BYPASS OTP UI FOR TESTING (User Request)
-    // sendOTP();
-    onContinue(); // Immediately proceed to instructions
+    if (isOTPEnabled) {
+      sendOTP();
+    } else {
+      onContinue(); 
+    }
   }
 
   const isSending   = phase === 'sending';
   const isVerifying = phase === 'verifying';
   const isVerified  = phase === 'verified';
-  const inOTPMode   = phase === 'otp' || phase === 'verifying' || phase === 'verified' || phase === 'sending';
+  const inOTPMode   = isOTPEnabled && (phase === 'otp' || phase === 'verifying' || phase === 'verified' || phase === 'sending');
   const otpFilled   = otp.every(d => d !== '');
 
   const inputBase = { width: '100%', height: '42px', padding: '0 12px', border: '1px solid #c7cdd4', fontSize: '14px', background: '#fff', outline: 'none', boxSizing: 'border-box' };
@@ -152,13 +155,10 @@ export default function CandidateDetailsStep({
         {/* Section header bar */}
         <div style={{ marginBottom: '16px', border: '1px solid #e5e7eb', background: '#fff', padding: '14px 16px' }}>
           <div style={{ fontSize: '15px', fontWeight: 700, color: '#111827' }}>
-            {inOTPMode ? 'Mobile Verification' : 'Candidate Authentication'}
+            Candidate Authentication
           </div>
           <div style={{ marginTop: '6px', fontSize: '13px', color: '#6b7280', lineHeight: 1.55 }}>
-            {inOTPMode
-              ? <>A 6-digit OTP has been sent to <strong style={{ color: '#111827' }}>{maskedPhone}</strong>. Enter it below.</>
-              : 'Enter your details to proceed with the assessment.'
-            }
+            Enter your details to proceed with the assessment. (OTP Verification temporarily disabled for integration testing)
           </div>
         </div>
 
@@ -168,112 +168,27 @@ export default function CandidateDetailsStep({
           {/* LEFT CARD — switches between details & OTP */}
           <div style={{ border: '1px solid #d1d5db', background: '#fff' }}>
             <div style={{ background: '#f3f4f6', padding: '10px 16px', borderBottom: '1px solid #d1d5db', fontWeight: 'bold', fontSize: '14px' }}>
-              {inOTPMode ? 'Enter OTP' : 'Candidate Information'}
+              Candidate Information
             </div>
 
             {/* ── DETAILS PHASE ── */}
-            {!inOTPMode && (
-              <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                    Full Name *
-                  </label>
-                  <input type="text" required value={name} onChange={e => setName(e.target.value)}
-                    placeholder="Enter your full name" style={inputBase} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                    Phone Number *
-                  </label>
-                  <input type="tel" required inputMode="numeric" maxLength={10} value={phone}
-                    onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    placeholder="Enter 10 digit phone" style={inputBase} />
-                </div>
-              </div>
-            )}
-
-            {/* ── OTP PHASE ── */}
-            {inOTPMode && (
-              <div style={{ padding: '20px 16px' }}>
-                {/* Candidate pill */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px', padding: '10px 12px', background: '#f9fafb', border: '1px solid #e5e7eb' }}>
-                  <div style={{ width: '34px', height: '34px', borderRadius: '50%', background: '#1a1a2e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ fontSize: '14px', fontWeight: 800, color: '#fff' }}>{name.charAt(0).toUpperCase()}</span>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#111827' }}>{name}</div>
-                    <div style={{ fontSize: '11px', color: '#9ca3af', fontFamily: 'monospace' }}>{maskedPhone}</div>
-                  </div>
-                  {isVerified && <span style={{ fontSize: '10px', fontWeight: 700, color: '#155724', background: '#d4edda', border: '1px solid #a3d9b1', padding: '3px 10px' }}>✓ Verified</span>}
-                </div>
-
-                {/* OTP label */}
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '10px', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-                  Verification Code
+            <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                  Full Name *
                 </label>
-
-                {/* OTP boxes */}
-                <div
-                  style={{ display: 'flex', gap: isMobile ? '6px' : '10px', justifyContent: 'center', marginBottom: '16px', ...(shake ? { animation: 'shake 0.5s ease' } : {}) }}
-                >
-                  <style>{`
-                    @keyframes shake {
-                      0%,100%{transform:translateX(0)} 20%{transform:translateX(-7px)} 40%{transform:translateX(7px)}
-                      60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
-                    }
-                    .otp-box:focus { border-color: #1a1a2e !important; background: #f0f4ff !important; outline: none; box-shadow: 0 0 0 3px rgba(26,26,46,0.08); }
-                  `}</style>
-                  {otp.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      ref={el => inputRefs.current[idx] = el}
-                      className="otp-box"
-                      type="text" inputMode="numeric" maxLength={1} value={digit}
-                      onChange={e => handleOtpInput(idx, e.target.value)}
-                      onKeyDown={e => handleOtpKeyDown(idx, e)}
-                      onPaste={idx === 0 ? handlePaste : undefined}
-                      disabled={isVerifying || isSending || isVerified}
-                      style={{
-                        width: isMobile ? '38px' : '48px', height: isMobile ? '44px' : '52px', textAlign: 'center',
-                        fontSize: isMobile ? '18px' : '22px', fontWeight: 800, fontFamily: 'monospace',
-                        border: `2px solid ${otpError ? '#e94560' : digit ? '#1a1a2e' : '#d1d5db'}`,
-                        background: isVerified ? '#d4edda' : digit ? '#f0f4ff' : '#fafafa',
-                        color: otpError ? '#e94560' : isVerified ? '#155724' : '#1a1a2e',
-                        borderRadius: '4px', transition: 'all 0.15s',
-                        cursor: isVerifying || isSending || isVerified ? 'not-allowed' : 'text',
-                        opacity: isSending && !isVerified ? 0.5 : 1,
-                      }}
-                    />
-                  ))}
-                </div>
-
-                {/* OTP Error */}
-                {otpError && (
-                  <div style={{ marginBottom: '12px', padding: '9px 12px', background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24', fontSize: '11px', fontWeight: 600 }}>
-                    {otpError}
-                  </div>
-                )}
-
-                {/* Resend row */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
-                  <span style={{ fontSize: '11px', color: '#9ca3af' }}>
-                    {cooldown > 0
-                      ? <>Resend in <strong style={{ color: '#374151', fontVariantNumeric: 'tabular-nums' }}>{cooldown}s</strong></>
-                      : "Didn't receive code?"
-                    }
-                  </span>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    {[['text', 'SMS'], ['voice', 'Call']].map(([type, label]) => (
-                      <button key={type} onClick={() => resendOTP(type)}
-                        disabled={cooldown > 0 || isSending || isVerified}
-                        style={{ padding: '4px 10px', fontSize: '10px', fontWeight: 700, border: '1px solid #d1d5db', background: '#fff', color: cooldown > 0 || isSending ? '#9ca3af' : '#374151', cursor: cooldown > 0 || isSending || isVerified ? 'not-allowed' : 'pointer', borderRadius: '2px' }}>
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <input type="text" required value={name} onChange={e => setName(e.target.value)}
+                  placeholder="Enter your full name" style={inputBase} />
               </div>
-            )}
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '6px', color: '#4b5563', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                  Phone Number *
+                </label>
+                <input type="tel" required inputMode="numeric" maxLength={10} value={phone}
+                  onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="Enter 10 digit phone" style={inputBase} />
+              </div>
+            </div>
           </div>
 
           {/* RIGHT CARD — Exam Snapshot (always visible) */}
@@ -302,7 +217,7 @@ export default function CandidateDetailsStep({
             <span style={{ background: '#d4edda', border: '1px solid #28a745', color: '#155724', fontWeight: 700, padding: '3px 8px' }}>
               Step 1 of 4
             </span>
-            <span>Registration details</span>
+            <span>{isOTPEnabled ? 'Authentication via OTP' : 'Registration details'}</span>
           </div>
 
           {/* Action buttons */}
@@ -311,7 +226,7 @@ export default function CandidateDetailsStep({
               onClick={handleContinueClick}
               style={{ padding: '12px 32px', fontSize: '14px', fontWeight: 'bold', background: '#222', color: '#fff', border: 'none', cursor: 'pointer', borderRadius: '2px' }}
             >
-              {isSending ? 'Sending...' : 'Continue →'}
+              {isSending ? 'Sending...' : isOTPEnabled ? 'Verify & Continue →' : 'Continue to Exam →'}
             </button>
           )}
 
