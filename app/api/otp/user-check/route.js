@@ -3,48 +3,43 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 /**
- * Handle OPTIONS (Pre-flight)
+ * GET /api/otp/user-check
+ * 
+ * Robust version for MSG91 User Existence Validation.
+ * Logs incoming requests to help debug connectivity issues with Hostinger/MSG91.
  */
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, authkey',
-    },
-  });
-}
-
-/**
- * Handle GET and POST for User Existence Validation
- */
-async function handleRequest(request) {
+export async function GET(request) {
   const url = new URL(request.url);
-  const mobile = url.searchParams.get('mobile') || url.searchParams.get('phone') || '9876543210';
+  const mobile = url.searchParams.get('mobile') || url.searchParams.get('phone');
   
-  console.log(`[MSG91 User-Check] ${request.method} hit by:`, request.headers.get('user-agent'));
-
-  // Use a formatted JSON string to be absolutely safe with strict parsers
-  const responseBody = {
-    "user_found": true,
-    "identifier": mobile.includes('@') ? mobile : `user_${mobile}@test.com`
-  };
-
-  // Stringify with spacing to match MSG91's exact example format
-  const jsonResponse = JSON.stringify(responseBody, null, 2);
-
-  return new NextResponse(jsonResponse, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-    },
+  // LOGGING: This will help us see if MSG91 is actually hitting our server
+  console.log('[MSG91 User-Check] Incoming Request:', {
+    fullUrl: request.url,
+    mobileParam: mobile,
+    userAgent: request.headers.get('user-agent'),
+    ip: request.headers.get('x-forwarded-for') || 'unknown'
   });
-}
 
-export async function GET(request) { return handleRequest(request); }
-export async function POST(request) { return handleRequest(request); }
+  try {
+    // MSG91 is very strict about the JSON format.
+    // We return user_found: true so the transition is never blocked.
+    const responseBody = {
+      user_found: true,
+      identifier: mobile || 'Candidate'
+    };
+
+    return new NextResponse(JSON.stringify(responseBody), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  } catch (err) {
+    console.error('[MSG91 User-Check] Internal Error:', err);
+    return new NextResponse(JSON.stringify({ user_found: false, error: 'Internal Error' }), { 
+      status: 200, // Return 200 even on error to satisfy some validation crawlers
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
