@@ -1,13 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import CandidateDetailsStep from '@/app/test/components/CandidateDetailsStep';
 import InstructionsStep from '@/app/test/components/InstructionsStep';
 import PreparationStep from '@/app/test/components/PreparationStep';
 import TestInterfaceStep from '@/app/test/components/TestInterfaceStep';
+
+function buildInitialStatuses(questions) {
+  const firstQuestionNumber = questions[0]?.questionNumber ?? null;
+  const initialStatuses = {};
+
+  questions.forEach((question) => {
+    initialStatuses[question.questionNumber] =
+      question.questionNumber === firstQuestionNumber ? 'not_answered' : 'not_visited';
+  });
+
+  return initialStatuses;
+}
 
 export default function TestClient({ exam, questions, adminPreview = false, attemptToken = '' }) {
   const router = useRouter();
@@ -18,15 +29,13 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
   const [agreed, setAgreed] = useState(false);
   const [activeQ, setActiveQ] = useState(() => questions[0]?.questionNumber ?? null);
   const [answers, setAnswers] = useState({});
-  const [statuses, setStatuses] = useState({});
+  const [statuses, setStatuses] = useState(() => buildInitialStatuses(questions));
   const [timeLeft, setTimeLeft] = useState(totalDurationSeconds);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [, setWarnings] = useState(0);
-  const warningCountRef = useRef(0);
-  const [autoSubmitRef] = useState({ current: false });
   const [activeSection, setActiveSection] = useState('all');
-  const [mobileActiveTab, setMobileActiveTab] = useState('question'); // 'passage' | 'question' | 'palette'
+  const [mobileActiveTab, setMobileActiveTab] = useState('question');
 
   const hasSections = exam.sections && exam.sections.length > 0;
   const sectionNames = hasSections ? exam.sections.map((s) => s.name) : [];
@@ -36,6 +45,31 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
     () => new Map(orderedQuestionNumbers.map((qNum, index) => [qNum, index])),
     [orderedQuestionNumbers]
   );
+  const questionByNumber = useMemo(
+    () => new Map(questions.map((question) => [question.questionNumber, question])),
+    [questions]
+  );
+  const questionsBySection = useMemo(() => {
+    const map = new Map();
+
+    questions.forEach((question) => {
+      const key = question.section || '';
+      if (!map.has(key)) {
+        map.set(key, []);
+      }
+      map.get(key).push(question);
+    });
+
+    return map;
+  }, [questions]);
+  const currentQuestion = activeQ === null ? null : questionByNumber.get(activeQ) ?? null;
+  const visibleQuestions = useMemo(() => {
+    if (activeSection === 'all') {
+      return questions;
+    }
+
+    return questionsBySection.get(activeSection) || [];
+  }, [activeSection, questions, questionsBySection]);
 
   const sectionQuestionCountMap = useMemo(() => {
     const countMap = new Map();
@@ -82,25 +116,6 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
   const isFirstQuestion = currentQuestionIndex <= 0;
   const isLastQuestion =
     currentQuestionIndex === -1 || currentQuestionIndex === orderedQuestionNumbers.length - 1;
-
-  useEffect(() => {
-    if (orderedQuestionNumbers.length === 0) {
-      if (activeQ !== null) setActiveQ(null);
-      return;
-    }
-    if (activeQ === null || !questionIndexByNumber.has(activeQ)) setActiveQ(firstQuestionNumber);
-  }, [activeQ, firstQuestionNumber, orderedQuestionNumbers.length, questionIndexByNumber]);
-
-  useEffect(() => {
-    if (step === 4 && Object.keys(statuses).length === 0 && firstQuestionNumber !== null) {
-      const initialStatuses = {};
-      questions.forEach((q) => {
-        initialStatuses[q.questionNumber] =
-          q.questionNumber === firstQuestionNumber ? 'not_answered' : 'not_visited';
-      });
-      setStatuses(initialStatuses);
-    }
-  }, [firstQuestionNumber, questions, statuses, step]);
 
   const handleSubmitTest = useCallback(async () => {
     if (isSubmitting) return;
@@ -152,23 +167,28 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
   }, [adminPreview, answers, attemptToken, exam.id, isSubmitting, name, phone, questions.length, router]);
 
   useEffect(() => {
-    let timer;
-    if (adminPreview) return undefined;
-    if (step === 4 && timeLeft > 0 && !isSubmitting) {
-      timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
-    } else if (timeLeft === 0 && step === 4 && !isSubmitting) {
-      handleSubmitTest();
+    if (adminPreview || step !== 4 || isSubmitting || timeLeft <= 0) {
+      return undefined;
     }
-    return () => clearInterval(timer);
-  }, [adminPreview, handleSubmitTest, isSubmitting, step, timeLeft]);
 
-  // Watch warningCountRef — auto-submit when 3 violations are reached
+    const timer = window.setInterval(() => {
+      setTimeLeft((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [adminPreview, isSubmitting, step, timeLeft]);
+
   useEffect(() => {
-    if (autoSubmitRef.current) {
-      autoSubmitRef.current = false;
-      handleSubmitTest();
+    if (adminPreview || step !== 4 || isSubmitting || timeLeft !== 0) {
+      return undefined;
     }
-  });
+
+    const submitTimer = window.setTimeout(() => {
+      void handleSubmitTest();
+    }, 0);
+
+    return () => window.clearTimeout(submitTimer);
+  }, [adminPreview, handleSubmitTest, isSubmitting, step, timeLeft]);
 
   useEffect(() => {
     if (adminPreview || step !== 4 || isSubmitting) return;
@@ -180,15 +200,16 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
     };
     const handleVisibilityChange = () => {
       if (!document.hidden) return;
-      warningCountRef.current += 1;
-      if (warningCountRef.current >= 3) {
-        alert('SECURITY VIOLATION: Test auto-submitted due to frequent tab switching.');
-        autoSubmitRef.current = true;
-        setWarnings(warningCountRef.current); // trigger re-render so the effect above fires
-        return;
-      }
-      alert(`WARNING ${warningCountRef.current}/3: Navigating away from the test window is prohibited.`);
-      setWarnings(warningCountRef.current);
+      setWarnings((count) => {
+        const nextCount = count + 1;
+        if (nextCount >= 3) {
+          alert('SECURITY VIOLATION: Test auto-submitted due to frequent tab switching.');
+          handleSubmitTest();
+          return nextCount;
+        }
+        alert(`WARNING ${nextCount}/3: Navigating away from the test window is prohibited.`);
+        return nextCount;
+      });
     };
     const handleKeyDown = (event) => {
       if (
@@ -201,20 +222,21 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
     };
     const handleFullscreenChange = () => {
       if (document.fullscreenElement) return;
-      warningCountRef.current += 1;
-      if (warningCountRef.current >= 3) {
-        alert('SECURITY VIOLATION: Test auto-submitted due to exiting fullscreen mode.');
-        autoSubmitRef.current = true;
-        setWarnings(warningCountRef.current);
-        return;
-      }
-      alert(`WARNING ${warningCountRef.current}/3: You exited fullscreen mode. Please return immediately.`);
-      try {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } catch {
-        // ignore
-      }
-      setWarnings(warningCountRef.current);
+      setWarnings((count) => {
+        const nextCount = count + 1;
+        if (nextCount >= 3) {
+          alert('SECURITY VIOLATION: Test auto-submitted due to exiting fullscreen mode.');
+          handleSubmitTest();
+          return nextCount;
+        }
+        alert(`WARNING ${nextCount}/3: You exited fullscreen mode. Please return immediately.`);
+        try {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } catch {
+          // ignore
+        }
+        return nextCount;
+      });
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -230,7 +252,14 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
   }, [adminPreview, handleSubmitTest, isSubmitting, step]);
 
   const handleCandidateDetailsContinue = () => {
-    // OTP is handled inside CandidateDetailsStep; this is called after OTP is verified
+    if (!name.trim() || !phone.trim()) {
+      setErrorMsg('Please provide both name and phone number.');
+      return;
+    }
+    if (phone.replace(/\D/g, '').length !== 10) {
+      setErrorMsg('Phone number must be exactly 10 digits.');
+      return;
+    }
     setErrorMsg('');
     setStep(2);
   };
@@ -281,6 +310,33 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
     if (activeQ === null) return;
     setAnswers((prev) => ({ ...prev, [activeQ]: optionKey }));
   };
+
+  const syncActiveSectionForQuestion = useCallback((questionNumber) => {
+    if (!hasSections) {
+      return;
+    }
+
+    const nextQuestion = questionByNumber.get(questionNumber);
+    const nextSectionName = nextQuestion?.section || '';
+
+    setActiveSection((previousSection) => {
+      if (previousSection === 'all') {
+        return previousSection;
+      }
+
+      return nextSectionName || 'all';
+    });
+  }, [hasSections, questionByNumber]);
+
+  const moveToQuestion = useCallback((questionNumber) => {
+    if (questionNumber === null) {
+      return;
+    }
+
+    syncActiveSectionForQuestion(questionNumber);
+    setActiveQ(questionNumber);
+  }, [syncActiveSectionForQuestion]);
+
   const getNextQuestionNumber = (questionNumber) => {
     const currentIndex = questionIndexByNumber.get(questionNumber);
     if (currentIndex === undefined) return null;
@@ -301,7 +357,7 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
       }
       return nextStatuses;
     });
-    if (nextQuestionNumber !== null) setActiveQ(nextQuestionNumber);
+    if (nextQuestionNumber !== null) moveToQuestion(nextQuestionNumber);
   };
   const handleSaveAndNext = () => {
     moveToNextQuestion((nextStatuses) => {
@@ -337,13 +393,15 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
       }
       return next;
     });
-    setActiveQ(previousQuestionNumber);
+    moveToQuestion(previousQuestionNumber);
   };
   const handleNext = () => {
     if (!isLastQuestion) handleSaveAndNext();
   };
-  const jumpToQuestion = (questionNumber) => {
+
+  const jumpToQuestion = useCallback((questionNumber) => {
     if (!questionIndexByNumber.has(questionNumber)) return;
+
     setStatuses((prev) => {
       const nextStatuses = { ...prev };
       if (activeQ !== null && (nextStatuses[activeQ] === 'not_visited' || nextStatuses[activeQ] === 'not_answered')) {
@@ -354,15 +412,32 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
       }
       return nextStatuses;
     });
-    setActiveQ(questionNumber);
-  };
+    moveToQuestion(questionNumber);
+  }, [activeQ, answers, moveToQuestion, questionIndexByNumber]);
+
+  const handleSectionChange = useCallback((sectionName) => {
+    setActiveSection(sectionName);
+
+    if (sectionName === 'all') {
+      return;
+    }
+
+    if (currentQuestion?.section === sectionName) {
+      return;
+    }
+
+    const firstQuestionInSection = (questionsBySection.get(sectionName) || [])[0];
+    if (firstQuestionInSection) {
+      jumpToQuestion(firstQuestionInSection.questionNumber);
+    }
+  }, [currentQuestion?.section, jumpToQuestion, questionsBySection]);
 
   const stats = useMemo(() => {
     const initial = { not_visited: 0, not_answered: 0, answered: 0, marked: 0, answered_marked: 0 };
     Object.values(statuses).forEach((value) => {
       if (value in initial) initial[value] += 1;
     });
-    initial.not_visited = Math.max(0, questions.length - Object.keys(statuses).length + initial.not_visited);
+    initial.not_visited = questions.length - Object.keys(statuses).length + initial.not_visited;
     return initial;
   }, [questions.length, statuses]);
 
@@ -407,11 +482,13 @@ export default function TestClient({ exam, questions, adminPreview = false, atte
     <TestInterfaceStep
       exam={exam}
       questions={questions}
+      visibleQuestions={visibleQuestions}
+      currentQuestion={currentQuestion}
       adminPreview={adminPreview}
       name={name}
       formattedTime={formattedTime}
       activeSection={activeSection}
-      setActiveSection={setActiveSection}
+      onSectionChange={handleSectionChange}
       hasSections={hasSections}
       sectionNames={sectionNames}
       currentQuestionNumber={activeQ}

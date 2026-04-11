@@ -10,11 +10,13 @@ export default function TestInterfaceStep(props) {
   const {
     exam,
     questions,
+    visibleQuestions,
+    currentQuestion,
     adminPreview,
     name,
     formattedTime,
     activeSection,
-    setActiveSection,
+    onSectionChange,
     hasSections,
     sectionNames,
     currentQuestionNumber,
@@ -48,7 +50,7 @@ export default function TestInterfaceStep(props) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const currentQ = questions.find((question) => question.questionNumber === currentQuestionNumber);
+  const currentQ = currentQuestion;
   const { passage: passageText, stem: stemText } = getPassageAndStem(currentQ);
 
   const renderPaletteButton = (questionNumber) => {
@@ -127,6 +129,15 @@ export default function TestInterfaceStep(props) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '14px', flexShrink: 0, textAlign: 'right' }}>
+          {adminPreview && (
+            <button
+              type="button"
+              onClick={onEndPreview}
+              style={{ fontSize: '10px', fontWeight: 800, color: '#0f3460', background: '#eef4ff', border: '1px solid #1a5276', borderRadius: '4px', padding: '6px 8px', cursor: 'pointer' }}
+            >
+              End Preview
+            </button>
+          )}
           {!isMobile && (
             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#e9ecef', border: `1px solid ${UI_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, color: '#495057', fontSize: '15px' }}>
               {adminPreview ? '…' : name ? name.charAt(0).toUpperCase() : '?'}
@@ -155,7 +166,7 @@ export default function TestInterfaceStep(props) {
           background: '#fff' 
         }}>
           <div style={{ padding: '10px 14px', borderBottom: `1px solid ${UI_BORDER}`, flexShrink: 0 }}>
-            <select value={activeSection} onChange={(e) => setActiveSection(e.target.value)} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', fontWeight: 700, border: `1px solid ${UI_BORDER}`, borderRadius: '6px', background: '#fff', cursor: 'pointer', color: '#212529' }}>
+            <select value={activeSection} onChange={(e) => onSectionChange(e.target.value)} style={{ width: '100%', padding: '10px 12px', fontSize: '13px', fontWeight: 700, border: `1px solid ${UI_BORDER}`, borderRadius: '6px', background: '#fff', cursor: 'pointer', color: '#212529' }}>
               {hasSections ? (
                 <>
                   <option value="all">All Sections</option>
@@ -189,23 +200,34 @@ export default function TestInterfaceStep(props) {
           background: '#fff' 
         }}>
           <div style={{ height: '44px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', borderBottom: `1px solid ${UI_BORDER}` }}>
-            <span style={{ fontWeight: 700, fontSize: '14px', color: '#333' }}>Q {currentQ?.questionNumber ?? '—'}/{questions.length}</span>
+            <span style={{ fontWeight: 700, fontSize: '14px', color: '#333' }}>
+              Q {currentQ?.questionNumber ?? '—'}/{questions.length}
+              {currentQ?.section ? ` · ${currentQ.section}` : ''}
+            </span>
             <button type="button" onClick={() => { const detail = window.prompt('Report an issue:', ''); if (detail) alert('Sent to admin.'); }} style={{ fontSize: '11px', fontWeight: 700, color: '#856404', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: '4px', padding: '4px 8px', cursor: 'pointer' }}>⚠ Report</button>
           </div>
           <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: isMobile ? '16px 16px 80px' : '20px 22px 12px' }}>
             {errorMsg && <div style={{ background: '#f8d7da', border: '1px solid #f5c6cb', color: '#721c24', padding: '8px 12px', fontSize: '13px', marginBottom: '16px' }}>{errorMsg}</div>}
-            <div style={{ fontSize: isMobile ? '16px' : '15px', fontWeight: 400, lineHeight: 1.6, color: '#222', marginBottom: '22px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{stemText || '—'}</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {['A', 'B', 'C', 'D'].map((optKey) => {
-                const isSelected = answers[currentQuestionNumber] === optKey;
-                return (
-                  <label key={optKey} onClick={() => onSelectOption(optKey)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 14px', border: isSelected ? `2px solid ${UI_GREEN}` : `1px solid ${UI_BORDER}`, background: isSelected ? '#e8f5e9' : '#fff', cursor: 'pointer', borderRadius: '8px' }}>
-                    <span style={{ width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0, background: isSelected ? UI_GREEN : '#f1f3f5', color: isSelected ? '#fff' : '#495057', border: isSelected ? '2px solid #1e7e34' : `1px solid ${UI_BORDER}` }}>{optKey}</span>
-                    <span style={{ fontSize: '14px', color: '#212529' }}>{currentQ?.options[optKey]}</span>
-                  </label>
-                );
-              })}
-            </div>
+            {currentQ ? (
+              <>
+                <div style={{ fontSize: isMobile ? '16px' : '15px', fontWeight: 400, lineHeight: 1.6, color: '#222', marginBottom: '22px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{stemText || '—'}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {['A', 'B', 'C', 'D'].map((optKey) => {
+                    const isSelected = answers[currentQuestionNumber] === optKey;
+                    return (
+                      <label key={optKey} onClick={() => onSelectOption(optKey)} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 14px', border: isSelected ? `2px solid ${UI_GREEN}` : `1px solid ${UI_BORDER}`, background: isSelected ? '#e8f5e9' : '#fff', cursor: 'pointer', borderRadius: '8px' }}>
+                        <span style={{ width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0, background: isSelected ? UI_GREEN : '#f1f3f5', color: isSelected ? '#fff' : '#495057', border: isSelected ? '2px solid #1e7e34' : `1px solid ${UI_BORDER}` }}>{optKey}</span>
+                        <span style={{ fontSize: '14px', color: '#212529' }}>{currentQ.options[optKey]}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <div style={{ background: '#fff3cd', border: '1px solid #ffe69c', color: '#664d03', padding: '12px 14px', borderRadius: '8px', lineHeight: 1.6 }}>
+                No question is available for the current selection. Choose another section from the dropdown or ask the admin to verify section mapping in the builder.
+              </div>
+            )}
           </div>
           
           {/* ACTION BUTTONS (FOOTER OF QUESTION PANEL ON MOBILE) */}
@@ -237,9 +259,15 @@ export default function TestInterfaceStep(props) {
           </div>
 
           <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '12px 14px 100px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(42px, 1fr))' : 'repeat(5, 1fr)', gap: '8px', justifyItems: 'center' }}>
-              {questions.filter((q) => activeSection === 'all' || q.section === activeSection).map((q) => renderPaletteButton(q.questionNumber))}
-            </div>
+            {visibleQuestions.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(42px, 1fr))' : 'repeat(5, 1fr)', gap: '8px', justifyItems: 'center' }}>
+                {visibleQuestions.map((q) => renderPaletteButton(q.questionNumber))}
+              </div>
+            ) : (
+              <div style={{ fontSize: '12px', lineHeight: 1.6, color: '#6c757d', background: '#f8f9fa', border: `1px dashed ${UI_BORDER}`, borderRadius: '8px', padding: '12px' }}>
+                No questions are assigned to this section yet.
+              </div>
+            )}
           </div>
 
           <div style={{ padding: '12px 14px', borderTop: `1px solid ${UI_BORDER}`, background: '#f8f9fa', marginBottom: isMobile ? '60px' : '0' }}>
