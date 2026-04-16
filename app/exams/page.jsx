@@ -14,13 +14,16 @@ export default async function ExamsListingPage() {
       <div className="bg-[#FFD700] border-b-[3px] border-[#e6c200]">
         <div className="mx-auto max-w-5xl px-6 py-6">
           <div className="flex flex-col gap-2 md:flex-row md:items-end justify-between">
-            <div>
-              <h1 className="text-[22px] font-bold text-black tracking-widest uppercase">
-                Candidate Assessment Portal
-              </h1>
-              <p className="mt-1 text-[13px] text-[#333] font-medium">
-                SECURE TESTING ENVIRONMENT • VERIFIED CANDIDATE ACCESS
-              </p>
+            <div className="flex items-center gap-4">
+              <img src="/logo.png" alt="LawPrep Logo" className="h-[60px] w-auto object-contain bg-white p-1 border border-black" />
+              <div>
+                <h1 className="text-[22px] font-bold text-black tracking-widest uppercase">
+                  Candidate Assessment Portal
+                </h1>
+                <p className="mt-1 text-[13px] text-[#333] font-medium">
+                  SECURE TESTING ENVIRONMENT • VERIFIED CANDIDATE ACCESS
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="text-[11px] font-bold text-[#155724] uppercase bg-[#d4edda] px-3 py-1.5 border border-[#28a745]">

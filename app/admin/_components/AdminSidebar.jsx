@@ -55,14 +55,8 @@ export default function AdminSidebar({ isOpen, onClose }) {
         {/* Brand */}
         <div className="px-5 pt-6 pb-5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-3">
-            <div
-              className="h-10 w-10 rounded-md flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #e94560 0%, #c0392b 100%)', boxShadow: '0 4px 12px rgba(233,69,96,0.35)' }}
-            >
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 14l9-5-9-5-9 5 9 5z" />
-                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-              </svg>
+            <div className="h-10 w-10 flex items-center justify-center bg-white rounded p-1">
+              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
             <div>
               <p className="text-sm font-extrabold text-white tracking-wide">EXAM SYSTEM</p>

@@ -18,6 +18,7 @@ export default function PreparationStep({ adminPreview, onStartTest }) {
           Preview mode — fullscreen and proctoring are off so you can review the paper comfortably.
         </p>
       )}
+      <img src="/logo.png" alt="Logo" style={{ height: '80px', width: 'auto', objectFit: 'contain', background: '#fff', padding: '10px', borderRadius: '8px', marginBottom: '32px' }} />
       <h1
         style={{
           fontSize: '48px',

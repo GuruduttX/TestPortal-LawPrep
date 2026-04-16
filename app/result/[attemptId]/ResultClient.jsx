@@ -42,12 +42,15 @@ export default function ResultClient({
       {/* Header Panel — only shown for student view (admin has its own header) */}
       {!isAdminView && (
         <div className="bg-white border border-gray-300 rounded-sm shadow-sm overflow-hidden mt-4">
-          <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900">Assessment Result Report</h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {exam?.title || attempt.examTitle} report.
-              </p>
+          <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <img src="/logo.png" alt="Logo" className="w-[80px] h-auto object-contain bg-white rounded border border-gray-200 p-1" />
+              <div>
+                <h1 className="text-xl font-semibold text-gray-900">Assessment Result Report</h1>
+                <p className="text-sm text-gray-500 mt-1">
+                  {exam?.title || attempt.examTitle} report.
+                </p>
+              </div>
             </div>
             <button 
               onClick={handleCopyLink}

@@ -116,11 +116,7 @@ export default function TestInterfaceStep(props) {
     <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '14px', userSelect: 'none' }} onContextMenu={(event) => event.preventDefault()} onCopy={(event) => event.preventDefault()}>
       <header style={{ flexShrink: 0, minHeight: isMobile ? '48px' : '56px', background: '#fff', borderBottom: `2px solid ${UI_BORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '4px 12px' : '8px 18px', gap: '8px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <div title="Law Prep Tutorial" style={{ width: isMobile ? '38px' : '54px', height: isMobile ? '28px' : '38px', borderRadius: '50%', background: 'linear-gradient(165deg, #ffe066 0%, #ffd43b 42%, #e03131 95%)', border: '2px solid #c92a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isMobile ? '7px' : '9px', fontWeight: 900, color: '#1a1a1a', textAlign: 'center', lineHeight: 1.05, padding: '2px' }}>
-            LAW
-            <br />
-            PREP
-          </div>
+          <img src="/logo.png" alt="Law Prep Tutorial" title="Law Prep Tutorial" style={{ width: isMobile ? '80px' : '100px', height: 'auto', objectFit: 'contain' }} />
           {adminPreview && <span style={{ fontSize: '9px', fontWeight: 800, color: '#0f3460', background: '#e7f1ff', padding: '2px 6px', border: '1px solid #1a5276', borderRadius: '4px' }}>PREVIEW</span>}
         </div>
         
