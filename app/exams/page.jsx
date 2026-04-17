@@ -12,15 +12,15 @@ export default async function ExamsListingPage() {
   return (
     <main className="min-h-screen bg-white font-sans">
       <div className="bg-[#FFD700] border-b-[3px] border-[#e6c200]">
-        <div className="mx-auto max-w-5xl px-6 py-6">
-          <div className="flex flex-col gap-2 md:flex-row md:items-end justify-between">
-            <div className="flex items-center gap-4">
-              <img src="/logo.png" alt="LawPrep Logo" className="h-[60px] w-auto object-contain bg-white p-1 border border-black" />
+        <div className="px-4 py-1">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center justify-between">
+            <div className="flex items-center gap-5">
+              <img src="/logo.png" alt="LawPrep Logo" className="h-[150px] w-auto object-contain" />
               <div>
-                <h1 className="text-[22px] font-bold text-black tracking-widest uppercase">
+                <h1 className="text-[24px] font-bold text-black tracking-widest uppercase leading-none">
                   Candidate Assessment Portal
                 </h1>
-                <p className="mt-1 text-[13px] text-[#333] font-medium">
+                <p className="mt-1 text-[13px] text-[#333] font-semibold">
                   SECURE TESTING ENVIRONMENT • VERIFIED CANDIDATE ACCESS
                 </p>
               </div>

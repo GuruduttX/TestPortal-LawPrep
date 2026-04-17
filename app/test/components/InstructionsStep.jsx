@@ -25,10 +25,10 @@ export default function InstructionsStep({
 
   return (
     <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif', color: '#333' }}>
-      <div style={{ background: '#FFD700', padding: isMobile ? '8px 0' : '12px 0', borderBottom: '3px solid #e6c200' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-          <img src="/logo.png" alt="Logo" style={{ height: isMobile ? '30px' : '40px', width: 'auto', objectFit: 'contain', background: '#fff', padding: '2px', borderRadius: '4px' }} />
-          <h1 style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 'bold', color: '#000', margin: 0 }}>
+      <div style={{ background: '#FFD700', padding: '4px 0', borderBottom: '3px solid #e6c200' }}>
+        <div style={{ padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '24px' }}>
+          <img src="/logo.png" alt="Logo" style={{ height: isMobile ? '80px' : '140px', width: 'auto', objectFit: 'contain' }} />
+          <h1 style={{ fontSize: isMobile ? '16px' : '22px', fontWeight: 'bold', color: '#000', margin: 0, textTransform: 'uppercase', letterSpacing: '1px' }}>
             {exam.title}
           </h1>
         </div>

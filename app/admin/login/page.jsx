@@ -16,9 +16,7 @@ export default async function AdminLoginPage({ searchParams }) {
       <div className="absolute top-0 left-0 w-full">
         <div className="h-14 w-full flex items-center px-6" style={{ background: 'linear-gradient(90deg, #1a1a2e, #16213e, #0f3460)', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 flex items-center justify-center bg-white rounded p-0.5">
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
-            </div>
+            <img src="/logo.png" alt="Logo" className="h-[40px] w-auto object-contain" />
             <span className="text-white text-xs font-bold tracking-widest uppercase">Exam System</span>
           </div>
         </div>
